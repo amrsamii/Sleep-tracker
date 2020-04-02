@@ -81,14 +81,21 @@ class SleepTrackerViewModel(
     val eventShowSnackbar: LiveData<Boolean>
         get() = _eventShowSnackbar
 
-    fun onShowSnackbarComplete(){
+    fun onShowSnackbarComplete() {
         _eventShowSnackbar.value = false
     }
 
-    // this transformation map is executed every time nights receives new data from the database
-    val nightsString = Transformations.map(nights) { nights ->
-        // because this function has nothing to with viewModel and could be used by any other class, it's a utility function
-        formatNights(nights, application.resources)
+    private val _eventNavigateToSleepDetail = MutableLiveData<Long>()
+
+    val eventNavigateToSleepDetail: LiveData<Long?>
+        get() = _eventNavigateToSleepDetail
+
+    fun onNavigateToSleepDetailComplete() {
+        _eventNavigateToSleepDetail.value = null
+    }
+
+    fun onSleepNightClicked(id: Long) {
+        _eventNavigateToSleepDetail.value = id
     }
 
     init {

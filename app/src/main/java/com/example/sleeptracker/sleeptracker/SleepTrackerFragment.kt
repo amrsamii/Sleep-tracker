@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -32,6 +33,7 @@ import com.example.sleeptracker.database.SleepDatabase
 import com.example.sleeptracker.database.SleepDatabaseDao
 import com.example.sleeptracker.databinding.FragmentSleepTrackerBinding
 import com.example.sleeptracker.sleeptracker.SleepNightAdapter
+import com.example.sleeptracker.sleeptracker.SleepNightListener
 import com.example.sleeptracker.sleeptracker.SleepTrackerViewModel
 import com.google.android.material.snackbar.Snackbar
 
@@ -71,10 +73,12 @@ class SleepTrackerFragment : Fragment() {
         binding.lifecycleOwner = this
         binding.sleepTrackerViewModel = sleepTrackerViewModel
 
-        val manager = GridLayoutManager(context,3)
+        val manager = GridLayoutManager(context, 3)
         binding.sleepList.layoutManager = manager
 
-        val adapter = SleepNightAdapter()
+        val adapter = SleepNightAdapter(SleepNightListener { sleepId ->
+            sleepTrackerViewModel.onSleepNightClicked(sleepId)
+        })
         binding.sleepList.adapter = adapter
 
         // by using viewLifeCycleOwner, we can make sure this observer is only around when the RecyclerView is still on screen
@@ -102,6 +106,14 @@ class SleepTrackerFragment : Fragment() {
                     Snackbar.LENGTH_SHORT
                 ).show()
                 sleepTrackerViewModel.onShowSnackbarComplete()
+            }
+        }
+
+        sleepTrackerViewModel.eventNavigateToSleepDetail.observe(this) { nightId ->
+            nightId?.let {
+                findNavController().navigate(SleepTrackerFragmentDirections.actionSleepTrackerFragmentToSleepDetailFragment(
+                    nightId))
+                sleepTrackerViewModel.onNavigateToSleepDetailComplete()
             }
         }
 

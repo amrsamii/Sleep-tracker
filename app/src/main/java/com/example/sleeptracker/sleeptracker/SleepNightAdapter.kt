@@ -5,15 +5,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.sleeptracker.R
-import com.example.sleeptracker.convertDurationToFormatted
-import com.example.sleeptracker.convertNumericQualityToString
 import com.example.sleeptracker.database.SleepNight
 import com.example.sleeptracker.databinding.ListItemSleepNightBinding
 
 // ListAdapter builds RecyclerView Adapter backed by List
 // it will keep track of the list
-class SleepNightAdapter :
+class SleepNightAdapter(val clickListener: SleepNightListener) :
     ListAdapter<SleepNight, SleepNightAdapter.SleepNightViewHolder>(SleepNightDiffCallback()) {
     /**
      * This function creates new viewHolder for RecyclerView
@@ -33,16 +30,17 @@ class SleepNightAdapter :
      *  @param position -> the position in the list to bind
      */
     override fun onBindViewHolder(holder: SleepNightViewHolder, position: Int) {
-        val item = getItem(position)
-        holder.bind(item)
+        holder.bind(getItem(position), clickListener)
     }
 
     // A viewHolder describes an item view and metadata about its place within the RecyclerView
     class SleepNightViewHolder private constructor(val binding: ListItemSleepNightBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(item: SleepNight) {
+        fun bind(item: SleepNight,
+                 clickListener: SleepNightListener) {
             binding.sleepNight = item
+            binding.clickListener = clickListener
             // ask dataBinding to execute our pending bindings right away. It is a good idea when using binding adapters
             // in the recyclerView
             binding.executePendingBindings()
@@ -75,4 +73,11 @@ class SleepNightDiffCallback : DiffUtil.ItemCallback<SleepNight>() {
         return oldItem == newItem
     }
 
+}
+
+// this class will listen for clicks and pass on the related data for processing those clicks to the fragment
+// when user clicks an item, the onClick method in this listener will be triggered with the selected item
+class SleepNightListener(val clickListener: (sleepId: Long) -> Unit) {
+    // we will call onClick whenever the user clicks on an item
+    fun onClick(night: SleepNight) = clickListener(night.nightId)
 }
